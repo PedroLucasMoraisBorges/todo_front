@@ -48,9 +48,7 @@ class _TaskPageState extends State<TaskPage> {
   }
 
   Future<void> _updateTask() async {
-    // Verifique se os campos estão preenchidos
     if (titleController.text.isEmpty || descriptionController.text.isEmpty) {
-      // Exibe um alerta se algum campo estiver vazio
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor, preencha todos os campos!')),
       );
@@ -77,9 +75,7 @@ class _TaskPageState extends State<TaskPage> {
   }
 
   Future<void> _completeTask() async {
-    // Verifique se os campos estão preenchidos antes de completar a tarefa
     if (titleController.text.isEmpty || descriptionController.text.isEmpty) {
-      // Exibe um alerta se algum campo estiver vazio
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor, preencha todos os campos!')),
       );
@@ -152,47 +148,52 @@ class _TaskPageState extends State<TaskPage> {
                   const SizedBox(height: 16),
                   Text(
                     'Status: ${isComplete ? "Concluída" : "Pendente"}',
-                    style: const TextStyle(fontSize: 18),
+                    style: const TextStyle(fontSize: 16),
                   ),
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      ElevatedButton(
-                        onPressed: isComplete ? null : _completeTask,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Colors.green, // Cor do botão para completar
-                          foregroundColor:
-                              Colors.white, // Cor do texto no botão
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 14.0, horizontal: 16.0),
-                        ),
-                        child: const Text(
-                          'Concluir Tarefa',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      ElevatedButton(
-                        onPressed: _updateTask,
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 14.0, horizontal: 16.0),
-                        ),
-                        child: const Text(
-                          'Salvar Alterações',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 16),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: widget.store.isLoading,
+                    builder: (context, isLoading, child) {
+                      return Column(
+                        children: [
+                          ElevatedButton(
+                            onPressed: isLoading
+                                ? null
+                                : _updateTask,
+                            child: isLoading
+                                ? const CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
+                                  )
+                                : const Text('Salvar Alterações'),
+                          ),
+                          const SizedBox(height: 8),
+                          ElevatedButton(
+                            onPressed: isLoading || isComplete
+                                ? null
+                                : _completeTask,
+                            child: isLoading
+                                ? const CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
+                                  )
+                                : const Text('Concluir Tarefa'),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),
             );
+          } else {
+            return const Center(
+              child: Text(
+                'Tarefa não encontrada.',
+                style: TextStyle(color: Colors.red),
+              ),
+            );
           }
-          return const Center(child: Text('Tarefa não encontrada.'));
         },
       ),
     );
